@@ -1,0 +1,8 @@
+{
+  "dbname" : "express-api-auth",
+  "tokenSecret" : "t1m3cl0ud-5ecr3t-p5k",  
+  "tokenExpire": "6000",
+  "serviceUrl": "",
+  "serviceUrlSeparator": "",
+  "removeCallback": ""
+}

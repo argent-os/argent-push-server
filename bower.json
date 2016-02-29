@@ -1,0 +1,15 @@
+{
+  "name": "praxicorp-api",
+  "version": "1.0.0-beta",
+  "description": "Praxicorp API",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "tests",
+    "srv"
+  ],
+  "dependencies": {
+    "ionicons": "~2.0.1"
+  }
+}

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>server.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="karma.conf.html">
+                  karma.conf.js
+                </a>
+              
+                
+                <a class="source" href="protractor.conf.html">
+                  protractor.conf.js
+                </a>
+              
+                
+                <a class="source" href="server.html">
+                  server.js
+                </a>
+              
+                
+                <a class="source" href="session.html">
+                  session.js
+                </a>
+              
+                
+                <a class="source" href="srv.conf.html">
+                  srv.conf.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>server.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Init</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> express        = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">var</span> path           = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">var</span> favicon        = <span class="hljs-built_in">require</span>(<span class="hljs-string">'serve-favicon'</span>);
+<span class="hljs-keyword">var</span> logger         = <span class="hljs-built_in">require</span>(<span class="hljs-string">'morgan'</span>);
+<span class="hljs-keyword">var</span> cookieParser   = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cookie-parser'</span>);
+<span class="hljs-keyword">var</span> bodyParser     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
+<span class="hljs-keyword">var</span> expressSession = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express-session'</span>);
+<span class="hljs-keyword">var</span> port           = process.env.PORT || <span class="hljs-number">5001</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Mongo</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> uriUtil        = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongodb-uri'</span>);
+<span class="hljs-keyword">var</span> mongoose       = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">var</span> mongodbUri     = process.env.MONGOLAB_URI;
+<span class="hljs-keyword">var</span> mongooseUri    = uriUtil.formatMongoose(mongodbUri) + <span class="hljs-string">'/praxicorp'</span>;
+<span class="hljs-keyword">var</span> localMongo     = <span class="hljs-string">'mongodb://localhost:27017/praxicorp'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <hr>
+<p><strong><em>  HOWTO: Create local mongo instance to play with API locally  **</em></strong>
+<strong><em>  sudo mkdir data/db  **</em></strong>
+<strong><em>  sudo chmod -R 0777 data/db  **</em></strong>
+<strong><em>  sudo mongod –dbpath data/db  **</em></strong>
+<strong><em>  mongo-express -u user -p password -d database <em>*</em></em></strong></p>
+<hr>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Compression</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> h5bp           = <span class="hljs-built_in">require</span>(<span class="hljs-string">'h5bp'</span>);
+<span class="hljs-keyword">var</span> compress       = <span class="hljs-built_in">require</span>(<span class="hljs-string">'compression'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <hr>
+<p><strong><em>  Server startup in api/services/time/auth/lib/express-jwt-auth  **</em></strong></p>
+<hr>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-keyword">var</span> app = express();
+
+process.env.ENVIRONMENT == <span class="hljs-string">'DEV'</span> ? mongooseUri = <span class="hljs-string">'mongodb://localhost:27017/praxicorp'</span> : <span class="hljs-string">''</span>;
+process.env.ENVIRONMENT == <span class="hljs-string">'PROD'</span> ? mongooseUri =process.env.MONGOLAB_URI : <span class="hljs-string">''</span>;
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Running in '</span> + process.env.ENVIRONMENT + <span class="hljs-string">' mode'</span>);
+
+<span class="hljs-keyword">var</span> options = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>mongoconnection: localMongo || mongooseUri,</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  mongoconnection: mongooseUri,
+  logFile: path.join(__dirname, <span class="hljs-string">'authlogger.log'</span>),
+  corsDomains: [<span class="hljs-string">'http://localhost:5000'</span>, <span class="hljs-string">'http://fuelpump.herokuapp.com'</span>, <span class="hljs-string">'https://fuelpump.herokuapp.com'</span>, <span class="hljs-string">'https://thefuelapp.herokuapp.com'</span>, <span class="hljs-string">'https://timekloud.herokuapp.com'</span>],</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Nodemailer settings, used for resetting password</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  mailer: {
+    mailerFrom    : process.env.SUPPORT_EMAIL,
+    mailerTitle   : <span class="hljs-string">'Password reset'</span>,
+    mailerInfo    : <span class="hljs-string">'Hello! '</span>,
+    resetPasswordText    : <span class="hljs-string">'Hello from TimeKloud! Please use the following link to reset your password: '</span>,
+    transporter   : {
+      service: <span class="hljs-string">'Gmail'</span>,
+      auth: {
+        user: process.env.TIMEKLOUD_GMAIL,
+        pass: process.env.TIMEKLOUD_GMAIL_PW
+      }
+    }
+  }
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Setup API routes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> home         = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./api/routes/home'</span>);
+<span class="hljs-keyword">var</span> timeauth     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./api/services/time/auth'</span>)(app, options);
+<span class="hljs-keyword">var</span> timepost     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./api/services/time/post'</span>)(app, options);
+<span class="hljs-keyword">var</span> timeorg      = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./api/services/time/organization'</span>)(app, options);
+<span class="hljs-keyword">var</span> timecompany  = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./api/services/time/company'</span>)(app, options);
+<span class="hljs-keyword">var</span> timesheet    = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./api/services/time/timesheet'</span>)(app, options);
+
+app.use(express.static(path.join(__dirname, <span class="hljs-string">'api/web'</span>)));
+app.use(express.static(<span class="hljs-string">'src'</span>));
+app.use(<span class="hljs-string">'/bower_components'</span>,  express.static(<span class="hljs-string">'bower_components'</span>));
+app.use(<span class="hljs-string">'/'</span>, home);
+
+app.use(h5bp({ root: __dirname + <span class="hljs-string">'/src'</span> }));
+app.use(compress());</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>view engine setup</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.set(<span class="hljs-string">'views'</span>, path.join(__dirname, <span class="hljs-string">'api/web/views'</span>));
+app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">'ejs'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>uncomment after placing your favicon in /public</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.use(favicon(__dirname + <span class="hljs-string">'/public/favicon.ico'</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>app.use(logger(‘dev’));</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: <span class="hljs-literal">false</span> }));
+
+app.all(<span class="hljs-string">'*'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">req, res, next</span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Send the index.html for other files to support HTML5Mode</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    res.sendFile(<span class="hljs-string">'src/index.html'</span>, { root: __dirname });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>req.session.timestamp = Date.now();    </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    res.header(<span class="hljs-string">'Access-Control-Allow-Origin'</span>, <span class="hljs-string">'*'</span>);
+    res.header(<span class="hljs-string">'Access-Control-Allow-Methods'</span>, <span class="hljs-string">'GET,PUT,POST,DELETE'</span>);
+    res.header(<span class="hljs-string">'Access-Control-Allow-Headers'</span>, <span class="hljs-string">'X-Requested-With, Accept, Origin, Referer, User-Agent, Content-Type, Authorization'</span>);
+    next();    
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>catch 404 and forward to error handler</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.use(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">req, res, next</span>) </span>{
+    <span class="hljs-keyword">var</span> err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Not Found'</span>);
+    err.status = <span class="hljs-number">404</span>;
+    next(err);
+});
+
+app.use(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">req, res, next</span>) </span>{
+  res.header(<span class="hljs-string">"Access-Control-Allow-Origin"</span>, <span class="hljs-string">"*"</span>);
+  res.header(<span class="hljs-string">"Access-Control-Allow-Headers"</span>, <span class="hljs-string">"Origin, X-Requested-With, Content-Type, Accept"</span>);
+  next();
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>error handlers, development error handler, will print stacktrace</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">if</span> (process.env.ENVIRONMENT === <span class="hljs-string">'DEV'</span> || process.env.ENVIRONMENT == <span class="hljs-literal">undefined</span>) {
+    app.use(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err, req, res, next</span>) </span>{
+        res.status(err.status || <span class="hljs-number">500</span>);
+        res.render(<span class="hljs-string">'error'</span>, {
+            message: err.message,
+            error: err
+        });
+    });
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>production error handler, no stacktraces leaked to user</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.use(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err, req, res, next</span>) </span>{
+    res.statusCode=<span class="hljs-number">500</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>res.render(‘error’, {
+    message: err.message,
+    error: {}
+});</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Sessions</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> expressSession = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express-session'</span>)
+  , cookieParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cookie-parser'</span>)
+  , http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Create an HTTP server.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> server = http.createServer(app).listen(port);
+
+server.on(<span class="hljs-string">"close"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    process.exit();
+});
+
+<span class="hljs-built_in">module</span>.exports = app;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "name": "express-jwt-auth",
+  "version": "0.0.6",
+  "main": "./lib/express-jwt-auth.js",
+  "scripts": {
+    "test": "mocha tests/test.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "bcryptjs": "^0.7.12",
+    "body-parser": "^1.9.2",
+    "cors": "^2.5.0",
+    "express-validator": "^2.6.0",
+    "jwt-simple": "^0.2.0",
+    "lodash": "^2.4.1",
+    "log4js": "^0.6.21",
+    "moment": "^2.7.0",
+    "mongoose": "3.8",
+    "nconf": "^0.6.9",
+    "nodemailer": "^1.3.0"
+  },
+  "devDependencies": {
+    "atob": "^1.1.2",
+    "express": "^4.0.0",
+    "formidable": "^1.0.17",
+    "mime-db": "^1.9.1",
+    "mime-types": "^2.0.11",
+    "mocha": "^2.0.1",
+    "request": "^2.34.0",
+    "should": "^4.2.1",
+    "superagent": "^0.20.0"
+  },
+  "description": "Middleware for user authorization and authentication with JSON Web Token. Uses MongoDB for data storage.",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baniol/express-jwt-auth.git"
+  },
+  "keywords": [
+    "authorization",
+    "authentication",
+    "auth",
+    "login",
+    "register",
+    "signup"
+  ],
+  "author": {
+    "name": "Marcin Baniowski"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/baniol/express-jwt-auth/issues"
+  },
+  "homepage": "https://github.com/baniol/express-jwt-auth",
+  "_id": "express-jwt-auth@0.0.6",
+  "dist": {
+    "shasum": "16c77fc7761b5fbb32d54a0154c6cd8e97c93210",
+    "tarball": "http://registry.npmjs.org/express-jwt-auth/-/express-jwt-auth-0.0.6.tgz"
+  },
+  "_from": "express-jwt-auth@",
+  "_npmVersion": "1.3.10",
+  "_npmUser": {
+    "name": "baniol",
+    "email": "marcin.baniowski@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "baniol",
+      "email": "marcin.baniowski@gmail.com"
+    }
+  ],
+  "_shasum": "16c77fc7761b5fbb32d54a0154c6cd8e97c93210",
+  "_resolved": "https://registry.npmjs.org/express-jwt-auth/-/express-jwt-auth-0.0.6.tgz",
+  "readme": "ERROR: No README data found!"
+}

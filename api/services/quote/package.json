@@ -1,0 +1,4 @@
+{
+  "name": "quote",
+  "main": "./lib/express-quote.js"
+}

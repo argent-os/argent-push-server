@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>express-jwt-auth.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="secrets.html">
+                  secrets.js
+                </a>
+              
+                
+                <a class="source" href="user-controller.html">
+                  user-controller.js
+                </a>
+              
+                
+                <a class="source" href="express-jwt-auth.html">
+                  express-jwt-auth.js
+                </a>
+              
+                
+                <a class="source" href="logger.html">
+                  logger.js
+                </a>
+              
+                
+                <a class="source" href="mailer.html">
+                  mailer.js
+                </a>
+              
+                
+                <a class="source" href="userhelper.html">
+                  userhelper.js
+                </a>
+              
+                
+                <a class="source" href="utils.html">
+                  utils.js
+                </a>
+              
+                
+                <a class="source" href="user.html">
+                  user.js
+                </a>
+              
+                
+                <a class="source" href="account-test.html">
+                  account-test.js
+                </a>
+              
+                
+                <a class="source" href="config-test.html">
+                  config-test.js
+                </a>
+              
+                
+                <a class="source" href="mailer-test.html">
+                  mailer-test.js
+                </a>
+              
+                
+                <a class="source" href="test-server.html">
+                  test-server.js
+                </a>
+              
+                
+                <a class="source" href="test.html">
+                  test.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>express-jwt-auth.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> expressValidator = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express-validator'</span>);
+<span class="hljs-keyword">var</span> mongoose         = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">var</span> cors             = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cors'</span>);
+<span class="hljs-keyword">var</span> path             = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">var</span> bodyParser       = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
+<span class="hljs-keyword">var</span> nconf            = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nconf'</span>);
+<span class="hljs-keyword">var</span> extend           = <span class="hljs-built_in">require</span>(<span class="hljs-string">'util'</span>)._extend;
+<span class="hljs-keyword">var</span> configFile       = path.join(__dirname, <span class="hljs-string">'..'</span>, <span class="hljs-string">'config.json'</span>);
+<span class="hljs-keyword">var</span> corsOptions      = {};
+<span class="hljs-keyword">var</span> tokenSecret      = process.env.JWT_SECRET;
+
+nconf.file({ file: configFile});
+
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app, options</span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Initialize module with custom settings</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (!options) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'You have to provide options object!'</span>);
+  }
+  <span class="hljs-keyword">if</span> (options.logFile)  {
+    nconf.set(<span class="hljs-string">'logFile'</span>, options.logFile);
+  }
+  <span class="hljs-keyword">if</span> (tokenSecret) {
+    nconf.set(<span class="hljs-string">'tokenSecret'</span>, tokenSecret);
+  }
+  <span class="hljs-keyword">if</span> (options.tokenExpire) {
+    nconf.set(<span class="hljs-string">'tokenExpire'</span>, options.tokenExpire);
+  }
+  <span class="hljs-keyword">if</span> (options.mailer) {
+    nconf.set(<span class="hljs-string">'mailerSettings'</span>, options.mailer);
+  }
+  <span class="hljs-keyword">if</span> (options.serviceUrl) {
+    nconf.set(<span class="hljs-string">'serviceUrl'</span>, options.serviceUrl);
+  }
+  <span class="hljs-keyword">if</span> (options.serviceUrlSeparator) {
+    nconf.set(<span class="hljs-string">'serviceUrlSeparator'</span>, options.serviceUrlSeparator);
+  }
+  <span class="hljs-keyword">if</span> (options.removeCallback &amp;&amp; <span class="hljs-keyword">typeof</span> options.removeCallback === <span class="hljs-string">'function'</span>) {
+    nconf.set(<span class="hljs-string">'removeCallback'</span>, options.removeCallback);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Including userController after options setting is done</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> userController = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../controllers/user-controller'</span>);
+
+  <span class="hljs-keyword">if</span> (options.corsDomains) {
+    <span class="hljs-keyword">var</span> whitelist = options.corsDomains;
+    corsOptions = {
+      origin: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">origin, callback</span>)</span>{
+        <span class="hljs-keyword">var</span> originIsWhitelisted = whitelist.indexOf(origin) !== <span class="hljs-number">-1</span>;
+        callback(<span class="hljs-literal">null</span>, originIsWhitelisted);
+      }
+    };
+  }
+  <span class="hljs-keyword">if</span> (!options.mongoconnection) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'You must specify db connection details!'</span>);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <hr>
+<p><strong><strong><strong><strong><strong><strong>**</strong></strong></strong></strong></strong></strong> SERVER STARTUP <strong><strong><strong><strong><strong><strong><strong><strong><em>*</em></strong></strong></strong></strong></strong></strong></strong></strong></p>
+<hr>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+  mongoose.connect(options.mongoconnection);
+  mongoose.connection.on(<span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Cannot connect to MongoDB'</span>);
+  });
+
+  <span class="hljs-keyword">var</span> urlStrings = {
+    oAuthFB:        <span class="hljs-string">'/auth/facebook'</span>,
+    register:       <span class="hljs-string">'/v1/register'</span>,
+    login:          <span class="hljs-string">'/v1/login'</span>,
+    remindpassword: <span class="hljs-string">'/v1/remindpassword'</span>,
+    resetpassword:  <span class="hljs-string">'/v1/resetpassword'</span>,
+    authorize:      <span class="hljs-string">'/v1/authorize'</span>,
+    keepalive:      <span class="hljs-string">'/v1/keepalive'</span>,
+    profile:        <span class="hljs-string">'/v1/profile'</span>,
+    apikey:         <span class="hljs-string">'/v1/apikey'</span>,
+    removeaccount:  <span class="hljs-string">'/v1/removeaccount'</span>,
+    billing:        <span class="hljs-string">'/v1/billing'</span>,
+    plan:           <span class="hljs-string">'/v1/plan'</span>        
+  };
+
+  <span class="hljs-keyword">if</span> (options.urlStrings) {
+    extend(urlStrings, options.urlStrings);
+  }
+  nconf.set(<span class="hljs-string">'urlStrings'</span>, urlStrings);
+
+  app.use(cors());
+  app.use(bodyParser.json());
+  app.use(expressValidator());
+
+  <span class="hljs-comment">/*
+   |--------------------------------------------------------------------------
+   | Login with Facebook
+   |--------------------------------------------------------------------------
+   */</span>
+  app.post(urlStrings.oAuthFB, userController.loginFacebook);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>User routes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  app.post(urlStrings.register,       userController.register);
+  app.post(urlStrings.login,          userController.login);
+  app.post(urlStrings.remindpassword, userController.remindPassword);
+  app.post(urlStrings.resetpassword,  userController.resetPassword);
+  app.post(urlStrings.authorize,      userController.authorize, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{res.send(<span class="hljs-string">''</span>);});
+  app.post(urlStrings.keepalive,      userController.keepAlive);
+  app.get(urlStrings.apikey,          userController.authorize, userController.generateApiKey);
+  app.put(urlStrings.profile,         userController.authorize, userController.editProfile);
+  app.post(urlStrings.removeaccount,  userController.authorize, userController.removeAccount);
+  app.get(urlStrings.profile,         userController.authorize, userController.getProfile);
+  app.post(urlStrings.billing,        userController.authorize, userController.postBilling);
+  app.post(urlStrings.plan,           userController.authorize, userController.postPlan);
+
+  <span class="hljs-keyword">return</span> userController.authorize;
+};</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

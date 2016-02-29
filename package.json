@@ -1,0 +1,57 @@
+{
+  "name": "praxicorp-api",
+  "version": "0.0.1",
+  "description": "Praxicorp API",
+  "private": true,
+  "authors": [
+    "Sinan Ulkuatam"
+  ],
+  "engines": {
+    "node": "0.10.x"
+  },
+  "scripts": {
+    "init": "npm install",
+    "install": "bower install",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "apn": "^1.7.5",
+    "async": "^1.4.0",
+    "bcryptjs": "^2.2.1",
+    "body-parser": "^1.13.3",
+    "bower": "^1.4.1",
+    "compression": "^1.5.2",
+    "cookie-parser": "^1.3.5",
+    "cors": "^2.7.1",
+    "ejs": "^2.3.3",
+    "express": "^4.13.3",
+    "express-session": "^1.11.3",
+    "express-validator": "^2.13.0",
+    "firebase": "^2.3.2",
+    "firebase-token-generator": "^2.0.0",
+    "h5bp": "^0.1.4",
+    "hat": "0.0.3",
+    "jwt-simple": "^0.3.0",
+    "lodash": "^3.10.1",
+    "log4js": "^0.6.26",
+    "moment": "^2.10.6",
+    "mongodb-uri": "^0.9.7",
+    "mongoose": "^4.1.1",
+    "mongoose-timestamp": "^0.3.0",
+    "morgan": "^1.6.1",
+    "nconf": "^0.7.2",
+    "nodemailer": "^1.4.0",
+    "plaid": "^1.0.9",
+    "primus": "^3.2.1",
+    "primus-emitter": "^3.1.1",
+    "primus-multiplex": "^3.2.0",
+    "primus-resource": "^2.0.6",
+    "qs": "^6.0.1",
+    "querystring": "^0.2.0",
+    "request": "^2.67.0",
+    "serve-favicon": "^2.3.0",
+    "stripe": "^3.0.2",
+    "stripe-webhook-middleware": "^0.2.0",
+    "ws": "^0.7.2"
+  }
+}
