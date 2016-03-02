@@ -56,7 +56,7 @@ function StripeWebhook (options) {
 
       if(options.events && options.events[event.type]){
         options.events[event.type](event, res);
-        User.findOne({email: req.body.data.object.customer}, function(err, user) {
+        User.findOne({stripe.customerId: req.body.data.object.customer}, function(err, user) {
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
             res.status(400).send('User not found');
@@ -66,13 +66,13 @@ function StripeWebhook (options) {
             // Debug on specific device
             notify.sendPushNotification(options.events[event.type], "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
             notify.sendPushNotification(options.events[event.type], user.device_token_ios);
-            res.json({msg: 'new_password_success'});
+            res.json({msg: 'push_notfication_sent'});
             next();
           }
         });        
       } else if (options.respond) {
         req.stripeEvent = event;
-        User.findOne({email: req.body.data.object.customer}, function(err, user) {
+        User.findOne({stripe.customerId: req.body.data.object.customer}, function(err, user) {
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
             res.status(400).send('User not found');
@@ -82,7 +82,7 @@ function StripeWebhook (options) {
             // Debug on specific device
             notify.sendPushNotification(event, "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
             notify.sendPushNotification(event, user.device_token_ios);            
-            res.json({msg: 'new_password_success'});
+            res.json({msg: 'push_notfication_sent'});
             next();
           }
         });
