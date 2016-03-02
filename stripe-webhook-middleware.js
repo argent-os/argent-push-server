@@ -56,7 +56,7 @@ function StripeWebhook (options) {
 
       if(options.events && options.events[event.type]){
         options.events[event.type](event, res);
-        User.findOne({stripe.customerId: req.body.data.object.customer}, function(err, user) {
+        User.findOne({'stripe.customerId': req.body.data.object.customer}, function(err, user) {
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
             res.status(400).send('User not found');
@@ -72,7 +72,7 @@ function StripeWebhook (options) {
         });        
       } else if (options.respond) {
         req.stripeEvent = event;
-        User.findOne({stripe.customerId: req.body.data.object.customer}, function(err, user) {
+        User.findOne({'stripe.customerId': req.body.data.object.customer}, function(err, user) {
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
             res.status(400).send('User not found');
