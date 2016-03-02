@@ -16,7 +16,7 @@ var options = {
 
 var tokens = ["4d7019531068d155b7e4ec3c97d20e0afd9132e315e4690e69d286085d2c8881"];
 
-if(tokens[0] === "<insert token here>") {
+if(tokens[0] === "") {
     console.log("Please set token to a valid device token for the push notification service");
     process.exit();
 }
@@ -57,8 +57,8 @@ module.exports = {
         var note = new apn.notification();
         note.setAlertText("Hello, welcome to PayKloud!");
         note.badge = 1;
-        note.sound = "chime2.caf";
-        note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
+        note.sound = "chime.caf";
+        note.alert = "Hello from PayKloud!  Thank you for joining our app.";
         note.payload = {'messageFrom': 'Sinan'};
         service.pushNotification(note, tokens);
     },
@@ -75,17 +75,13 @@ module.exports = {
             service.pushNotification(note, token);
         });
     },
-    sendPushNotification: function(data) {
-        console.log('received basic webhook endpoint');
-        console.log('sending push notification');
-        tokens.forEach(function(token, i) {
-            var note = new apn.notification();
-            note.setAlertText("Hello, from PayKloud! You are number: " + i);
-            note.badge = 1;
-            note.sound = "chime2.caf";
-            note.alert = data;
-            note.payload = {'messageFrom': 'PayKloud'};
-            service.pushNotification(note, token);
-        });
+    sendPushNotification: function(data, userDeviceToken) {
+        var note = new apn.notification();
+        note.setAlertText("Hello, from PayKloud!");
+        note.badge = 1;
+        note.sound = "cashregister.caf";
+        note.alert = data;
+        note.payload = {'messageFrom': 'PayKloud'};
+        service.pushNotification(note, userDeviceToken);
     }
 }
