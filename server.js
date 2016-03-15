@@ -14,8 +14,8 @@ var mongodbUri     = process.env.MONGOLAB_URI;
 var mongooseUri    = uriUtil.formatMongoose(mongodbUri) + '/praxicorp';
 
 // Key Stripe and Firebase Handlers for DEV vs PROD
-process.env.ENVIRONMENT == 'DEV' ? mongooseUri = 'mongodb://localhost:27017/praxicorp' : '';
-process.env.ENVIRONMENT == 'PROD' ? mongooseUri =process.env.MONGOLAB_URI : '';
+process.env.ENVIRONMENT == 'DEV' ? mongooseUri = process.env.MONGOLAB_URI_DEV : '';
+process.env.ENVIRONMENT == 'PROD' ? mongooseUri = process.env.MONGOLAB_URI : '';
 
 mongoose.connect(mongooseUri);
 mongoose.connection.on('error', function () {
