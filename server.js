@@ -35,15 +35,15 @@ var stripe = require('stripe')(options.apiKey);
 // The middleware is where we handle the webhook endpoint calls and push notifications
 var StripeWebhook = require('./stripe-webhook-middleware');
 
-var webhook = new StripeWebhook({
+var stripe_webhook = new StripeWebhook({
    stripeApiKey: options.apiKey
 });
 
 var notify = require('./push-notification');
-notify.sendPushNotification("Push server updated, iOS push notifications running", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
+notify.sendPushNotification("push server started", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
 
 // Listen for webhook events
-app.post('/webhook/stripe', webhook.middleware);
+app.post('/webhook/stripe', stripe_webhook.middleware);
 
 console.log("listening on port " + port);
 app.listen(port);

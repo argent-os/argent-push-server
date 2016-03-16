@@ -69,7 +69,7 @@ module.exports = {
             var note = new apn.notification();
             note.setAlertText("Hello, from PayKloud! You are number: " + i);
             note.badge = 1;
-            note.sound = "chime2.caf";
+            note.sound = "chime1.caf";
             note.alert = "Push notifications now running";
             note.payload = {'messageFrom': 'PayKloud'};
             service.pushNotification(note, token);
@@ -79,7 +79,7 @@ module.exports = {
         var note = new apn.notification();
         note.setAlertText("Hello, from PayKloud!");
         note.badge = 1;
-        note.sound = "cashregister.caf";
+        note.sound = "chime.caf";
         note.alert = data;
         note.payload = {'messageFrom': 'PayKloud'};
         service.pushNotification(note, userDeviceToken);

@@ -36,7 +36,18 @@ function StripeWebhook (options) {
     // used for testing
     if (req.body.id === 'evt_00000000000000'){
       self.emit('testWebhook', req.body);
+      logger.trace('in test event')
       // Change this token for testing purposes
+      User.findOne({"_id": "56e9849a6d3a65187f8d72e0"}, function(err, user) {
+        if(!user) {
+          console.log('no user')
+        } else {
+          console.log("success");
+          // var obj = JSON.parse(JSON.stringify(user));
+          // var device_token = obj.device_token_ios;
+          // console.log(device_token);
+        }
+      });
       notify.sendPushNotification("test.event", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
       return res.status(200).end();
     }
@@ -50,110 +61,61 @@ function StripeWebhook (options) {
       logger.info("showing options")
 
       if(err) {
-        if(err.type === 'StripeAuthenticationError') {
-          logger.error(err)
-          err.status = 401;
-          res.send(err.status)
-        } else {
-          logger.error(err)
-          err.status = 500;
-          res.send(err.status)
-        }
-        self.emit('err', err);
-        logger.error(err);
-        res.send(400)
-        next(err);
+        // if(err.type === 'StripeAuthenticationError') {
+        //   logger.error(err)
+        //   err.status = 401;
+        // } else {
+        //   logger.error(err)
+        //   err.status = 500;
+        // }
+        // self.emit('err', err);
+        // logger.error(err);
+        // next(err);
       }
 
-      if(!event){
-        error = new Error('Stripe event not found');
-        error.status = 400;
-        logger.error(error)
-        logger.error("event not found")
-        self.emit('err', error);
-        res.send(error.status)
-        next(error);
-      }
+      // if(!event){
+      //   error = new Error('Stripe event not found');
+      //   error.status = 400;
+      //   logger.error(error)
+      //   logger.error("event not found")
+      //   self.emit('err', error);
+      //   next(error);
+      // }
 
-      self.emit('event', event);
+        self.emit('event', event);
 
-      if(options.events && options.events[event.type]){
-        options.events[event.type](event, res);
-        logger.info("event", options.events[event.type])
-        logger.info("user data", req.body.data.object.customer)
-        logger.info("sending default notification")
-        notify.sendPushNotification(options.events[event.type], "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-        notify.sendPushNotification("Default Notify", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-        User.findOne({'stripe.customerId': req.body.data.object.customer}, function(err, user) {
-          if (!user) {
-            logger.error('user not found');
-            // res.json({msg: "user not found"});
-            notify.sendPushNotification("user not found", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce"); 
-            res.send(404).end();                       
-            // res.status(404).end();
-          } else {
-            logger.info(user);
-            logger.info('Push notification sent! ' + user._id);
-            // Debug on specific device
-            notify.sendPushNotification(options.events[event.type], "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-            notify.sendPushNotification(options.events[event.type], user.device_token_ios);
-            res.send(200)            
-            // res.json({msg: 'push_notfication_sent'});
-            next();
-          }
-        });        
-      } else if (options.respond) {
-        req.stripeEvent = event;
-        logger.info("event", options.events[event.type])
-        logger.info("user data", req.body.data.object)
-        logger.info("sending default notification")
-        notify.sendPushNotification(options.events[event.type], "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-        notify.sendPushNotification("default notify", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-        User.findOne({'stripe.customerId': req.body.user_id}, function(err, user) {
-          if (!user) {
-            logger.error('user not found');
-            // res.json({msg: "user not found"});
-            notify.sendPushNotification("user not found", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce"); 
-            res.send(404).end();                       
-            // res.status(404).end();
-          } else {
-            logger.info(user);
-            logger.info('Push notification sent! ' + user._id);
-            // Debug on specific device
-            notify.sendPushNotification(event, "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-            notify.sendPushNotification(event, user.device_token_ios);  
-            res.send(200)             
-            // res.json({msg: 'push_notfication_sent'});
-            next();
-          }
-        });
-      } else {
         logger.info("response ok, default push notify")
-        logger.info(req.body)
-        notify.sendPushNotification(event.type, "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");   
+        logger.info("request body", req.body)
+        logger.info("req user id:", req.body.user_id)
         User.findOne({'stripe.accountId': req.body.user_id}, function(err, user) {
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
-            logger.error('user not found in database, could not send targeted push notification');
-            // res.json({msg: "user not found"});
-            notify.sendPushNotification("user not found in database, could not send targeted push notification", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-            res.send(404).end();
+            logger.error('user not found');
+            res.json({msg: "user not found"});
+            notify.sendPushNotification("user not found", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
             next();
             // res.status(404).end();
           } else {
             logger.trace("user found");
-            logger.info(user);
-            logger.info('Push notification sent to user id:' + user._id);
+            console.log(JSON.stringify(user, null, 2));
+            logger.info('push notification sent to user id:', user._id);
+            logger.info('user device token:', user["device_token_ios"]);
+            logger.info('user device token:', user.device_token_ios);
+
+            var obj = JSON.parse(JSON.stringify(user));
+            var device_token = obj.device_token_ios;
+            console.log("device token is");
+            console.log(device_token);
+
             // Debug on specific device
-            notify.sendPushNotification(event.type, "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
-            notify.sendPushNotification(event.type, user.device_token_ios);            
+            var evt = req.body.type;
+            notify.sendPushNotification("user activity " + evt + " for user " + user["_id"], "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
+            notify.sendPushNotification(evt, device_token);            
             // res.json({msg: 'push_notfication_sent'});
-            res.send(200);
             next();
           }
         });
-        res.sendStatus(200).end();
-      }
+        res.send(200).end();
     });
   };
 }
