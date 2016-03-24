@@ -61,6 +61,8 @@ function StripeWebhook (options) {
       logger.info("showing options")
 
       if(err) {
+        logger.error(err);
+        next(err);
         // if(err.type === 'StripeAuthenticationError') {
         //   logger.error(err)
         //   err.status = 401;
@@ -91,7 +93,6 @@ function StripeWebhook (options) {
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
             logger.error('user not found');
-            res.json({msg: "user not found"});
             notify.sendPushNotification("user not found", "1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce");
             next();
             // res.status(404).end();
@@ -99,8 +100,6 @@ function StripeWebhook (options) {
             logger.trace("user found");
             console.log(JSON.stringify(user, null, 2));
             logger.info('push notification sent to user id:', user._id);
-            logger.info('user device token:', user["device_token_ios"]);
-            logger.info('user device token:', user.device_token_ios);
 
             var obj = JSON.parse(JSON.stringify(user));
             var device_token = obj.device_token_ios;
@@ -115,7 +114,7 @@ function StripeWebhook (options) {
             next();
           }
         });
-        res.send(200).end();
+        return res.send(200).end();
     });
   };
 }
