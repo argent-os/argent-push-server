@@ -14,7 +14,7 @@ var options = {
     "cacheLength": 5,
 };
 
-var tokens = ["1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce"];
+var tokens = ["66ce9f4562d88b3027cc63fcd3ced25188e649aea43b29f7d036f523abdb9ea7"];
 
 if(tokens[0] === "") {
     console.log("Please set token to a valid device token for the push notification service");
@@ -55,10 +55,10 @@ module.exports = {
         // If you plan on sending identical paylods to many devices you can do something like this.
         console.log("Sending the same notification each of the devices with one call to pushNotification.");
         var note = new apn.notification();
-        note.setAlertText("Hello, welcome to PayKloud!");
+        note.setAlertText("Hello, welcome to ProtonPay!");
         note.badge = 0;
         note.sound = "chime.caf";
-        note.alert = "Hello from PayKloud!  Thank you for joining our app.";
+        note.alert = "Hello from ProtonPay!  Thank you for joining our app.";
         note.payload = {'messageFrom': 'Sinan'};
         service.pushNotification(note, tokens);
     },
@@ -67,21 +67,21 @@ module.exports = {
         console.log("Sending a tailored notification to %d devices", tokens.length);
         tokens.forEach(function(token, i) {
             var note = new apn.notification();
-            note.setAlertText("Hello, from PayKloud! You are number: " + i);
+            note.setAlertText("Hello, from ProtonPay! You are number: " + i);
             note.badge = 0;
             note.sound = "chime1.caf";
             note.alert = "Push notifications now running";
-            note.payload = {'messageFrom': 'PayKloud'};
+            note.payload = {'messageFrom': 'ProtonPay'};
             service.pushNotification(note, token);
         });
     },
     sendPushNotification: function(data, userDeviceToken) {
         var note = new apn.notification();
-        note.setAlertText("Hello, from PayKloud!");
+        note.setAlertText("Hello, from ProtonPay!");
         note.badge = 0;
         note.sound = "chime.caf";
         note.alert = data;
-        note.payload = {'messageFrom': 'PayKloud'};
+        note.payload = {'messageFrom': 'ProtonPay'};
         service.pushNotification(note, userDeviceToken);
     }
 }
