@@ -14,7 +14,7 @@ var options = {
     "cacheLength": 5,
 };
 
-var tokens = ["e0721b1cfa934e6f5a420dba6700c120df868f2ed5a6f4177caa21765b7d4a77"];
+var tokens = ["1ca2298d29efb474858e7996c143590ac3deddf370b7fa30919b7c7cec52e27d"];
 
 if(tokens[0] === "") {
     console.log("Please set token to a valid device token for the push notification service");
@@ -79,7 +79,7 @@ module.exports = {
         var note = new apn.notification();
         note.setAlertText("Hello, from ProtonPay!");
         note.badge = 0;
-        note.sound = "chime.caf";
+        note.sound = "soft.caf";
         note.alert = data;
         note.payload = {'messageFrom': 'ProtonPay'};
         service.pushNotification(note, userDeviceToken);
