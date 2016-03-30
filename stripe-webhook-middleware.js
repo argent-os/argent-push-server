@@ -121,7 +121,7 @@ function StripeWebhook (options, app) {
             logger.info('sending push notification to api')
             // Change endpoint to dynamic url based on environment
             request
-              .post('http://paykloud-api-dev-v1.us-east-1.elasticbeanstalk.com/v1/notification')
+              .post('http://proton-api-dev.us-east-1.elasticbeanstalk.com/v1/notification')
               .send({ user_id: req.body.user_id,
                   date: Date.now(),
                   text: req.body.id })
