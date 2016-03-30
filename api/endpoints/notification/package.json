@@ -1,0 +1,4 @@
+{
+  "name": "notification",
+  "main": "./lib/express-notification.js"
+}

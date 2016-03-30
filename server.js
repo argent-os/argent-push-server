@@ -23,10 +23,10 @@ mongoose.connection.on('error', function () {
 });
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Stripe webhook push notifications
-var secrets = require(__dirname + '/api/services/auth/config/secrets');
+var secrets = require(__dirname + '/api/endpoints/auth/config/secrets');
 var options = secrets.stripeOptions;
 
 // First we load the Stripe library - https://github.com/abh/node-stripe
@@ -37,7 +37,7 @@ var StripeWebhook = require('./stripe-webhook-middleware');
 
 var stripe_webhook = new StripeWebhook({
    stripeApiKey: options.apiKey
-});
+}, app);
 
 var notify = require('./push-notification');
 notify.sendPushNotification("push server started", "1ca2298d29efb474858e7996c143590ac3deddf370b7fa30919b7c7cec52e27d");

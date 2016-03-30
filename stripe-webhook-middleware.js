@@ -2,13 +2,15 @@
 
 var util = require('util'),
   notify = require('./push-notification'),
-  User = require('./api/services/auth/models/user'),
+  User = require('./api/endpoints/auth/models/user'),
+  Notification = require('./api/endpoints/notification/models/notification'),
   log4js = require('log4js'),
   logger = log4js.getLogger(),
+  request = require('superagent'),
   events = require('./stripe-events'),
   EventEmitter = require('events').EventEmitter;
 
-function StripeWebhook (options) {
+function StripeWebhook (options, app) {
   EventEmitter.call(this);
 
   logger.trace("in webhook")
@@ -40,15 +42,25 @@ function StripeWebhook (options) {
       // Change this token for testing purposes
       User.findOne({"_id": "56e9849a6d3a65187f8d72e0"}, function(err, user) {
         if(!user) {
-          console.log('no user')
-        } else {
-          console.log("success");
-          // var obj = JSON.parse(JSON.stringify(user));
-          // var device_token = obj.device_token_ios;
-          // console.log(device_token);
+          logger.info('no user')
+        } else {    
+          logger.info('sending push notification to api')
+          request
+            .post('http://192.168.1.232:5001/v1/notification')
+            .send({ user_id: "testuser",
+                date: Date.now(),
+                text: req.body.id })
+            .set('Accept', 'application/json')
+            .end(function(err, res){
+              if(err) {
+                logger.error(err)
+              }
+              logger.info(res)
+              // Calling the end function will send the request
+          });           
         }
       });
-      notify.sendPushNotification("test.event", "66ce9f4562d88b3027cc63fcd3ced25188e649aea43b29f7d036f523abdb9ea7");
+      notify.sendPushNotification("test.event", "1ca2298d29efb474858e7996c143590ac3deddf370b7fa30919b7c7cec52e27d");
       return res.status(200).end();
     }
 
@@ -98,13 +110,34 @@ function StripeWebhook (options) {
             // res.status(404).end();
           } else {
             logger.trace("user found");
-            console.log(JSON.stringify(user, null, 2));
+            logger.info(JSON.stringify(user, null, 2));
             logger.info('push notification sent to user id:', user._id);
 
             var obj = JSON.parse(JSON.stringify(user));
             var device_token = obj.device_token_ios;
-            console.log("device token is");
-            console.log(device_token);
+            logger.info("device token is");
+            logger.info(device_token);
+
+            logger.info('sending push notification to api')
+            // Change endpoint to dynamic url based on environment
+            request
+              .post('http://paykloud-api-dev-v1.us-east-1.elasticbeanstalk.com//v1/notification')
+              .send({ user_id: req.body.user_id,
+                  date: Date.now(),
+                  text: req.body.id })
+              .set('Accept', 'application/json')
+              .end(function(err, res){
+                if(err) {
+                  logger.error(err)
+                }
+                logger.info(res)
+                var obj = JSON.parse(JSON.stringify(user));
+                var device_token = obj.device_token_ios;
+                logger.info("success");          
+                logger.info(device_token);              
+                logger.info(response);                
+                // Calling the end function will send the request
+            });       
 
             // Debug on specific device
             var evt = req.body.type;

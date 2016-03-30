@@ -1,4 +1,0 @@
-{
-  "name": "organization",
-  "main": "./lib/express-organization.js"
-}

@@ -1,7 +1,0 @@
-{
-  "dbname" : "company-api",
-  "tokenExpire": "6000",
-  "serviceUrl": "",
-  "serviceUrlSeparator": "",
-  "removeCallback": ""
-}
