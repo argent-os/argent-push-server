@@ -135,7 +135,6 @@ function StripeWebhook (options, app) {
                 var device_token = obj.device_token_ios;
                 logger.info("success");          
                 logger.info(device_token);              
-                logger.info(response);                
                 // Calling the end function will send the request
             });       
 
