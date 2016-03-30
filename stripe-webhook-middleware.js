@@ -55,7 +55,7 @@ function StripeWebhook (options, app) {
               if(err) {
                 logger.error(err)
               }
-              logger.info(res)
+              // logger.info(res)
               // Calling the end function will send the request
           });           
         }
@@ -130,7 +130,7 @@ function StripeWebhook (options, app) {
                 if(err) {
                   logger.error(err)
                 }
-                logger.info(res)
+                // logger.info(res)
                 var obj = JSON.parse(JSON.stringify(user));
                 var device_token = obj.device_token_ios;
                 logger.info("success");          
