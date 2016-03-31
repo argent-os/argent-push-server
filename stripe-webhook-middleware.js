@@ -118,11 +118,12 @@ function StripeWebhook (options, app) {
             logger.info("device token is");
             logger.info(device_token);
 
+            logger.info('user id is: ', user._id)
             logger.info('sending push notification to api')
             // Change endpoint to dynamic url based on environment
             request
               .post('http://proton-api-dev.us-east-1.elasticbeanstalk.com/v1/notification')
-              .send({ user_id: req.body.user_id,
+              .send({ user_id: user._id,
                   date: Date.now(),
                   text: req.body.id })
               .set('Accept', 'application/json')
