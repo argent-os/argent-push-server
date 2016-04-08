@@ -14,7 +14,7 @@ var options = {
     "cacheLength": 5,
 };
 
-var tokens = ["1ca2298d29efb474858e7996c143590ac3deddf370b7fa30919b7c7cec52e27d"];
+var tokens = ["deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3"];
 
 if(tokens[0] === "") {
     console.log("Please set token to a valid device token for the push notification service");
