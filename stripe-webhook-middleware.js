@@ -34,16 +34,23 @@ function StripeWebhook (options, app) {
       self.emit('err', error);
       next(error);
     }
-    // handle web hook testing from stripe
-    // used for testing
+    // Handle test web hook testing from stripe
+    // POST to
+    // http://localhost:5004/webhook/stripe
+    // Using body as json
+    // {
+    //   "object": "event",
+    //   "id": "evt_00000000000000"
+    // }
     if (req.body.id === 'evt_00000000000000'){
       self.emit('testWebhook', req.body);
       logger.trace('in test event')
       // Change this token for testing purposes
-      User.findOne({"_id": "56e9849a6d3a65187f8d72e0"}, function(err, user) {
+      User.findOne({"_id": "571a6865d94bd6ba0a734a9c"}, function(err, user) {
         if(!user) {
           logger.info('no user')
         } else {    
+          logger.info("user username is ", user.username)
           logger.info('sending push notification to api')
           request
             .post('http://192.168.1.232:5001/v1/notification')
@@ -102,7 +109,7 @@ function StripeWebhook (options, app) {
         logger.info("request body", req.body)
         logger.info("req user id:", req.body.user_id)
         var id = req.body.user_id
-        User.find({'stripe.accountId': id}, function(err, user) {
+        User.findOne({'stripe.accountId': id}, function(err, user) {
           if(err) {
             logger.error(err)
           }
@@ -114,15 +121,43 @@ function StripeWebhook (options, app) {
             // res.status(404).end();
           } else {
             logger.trace("user found");
-            // logger.info(JSON.stringify(user, null, 2));
 
             var obj = JSON.parse(JSON.stringify(user));
-            logger.info('push notification sent to user:', obj.username);
-            var device_token = (obj.ios != undefined) ? obj.ios.device_token : "";
-            logger.info("device token is", obj.ios.device_token);
-            logger.info(obj.ios.device_token);
+            // logger.debug("user is", user)
+            // logger.debug("parsed obj is", obj)
 
-            logger.info('user id is: ', obj._id)
+            if(user["ios"]) {
+              logger.debug("1 ios info is ", user["ios"])
+            }    
+            if(user.ios) {
+              logger.debug("2 ios info is ", user.ios)
+            }      
+            if(user["username"]) {
+              logger.debug("3 username info is ", user["username"])
+            }    
+            if(user.username) {
+              logger.debug("4 username info is ", user.username)
+            }      
+            if(obj["ios"]) {
+              logger.debug("5 ios info is ", obj["ios"])
+            }    
+            if(obj.ios) {
+              logger.debug("6 ios info is ", obj.ios)
+            }      
+            if(obj["username"]) {
+              logger.debug("7 username info is ", obj["username"])
+            }    
+            if(obj.username) {
+              logger.debug("8 username info is ", obj.username)
+            }                              
+            if(obj.ios) {
+              logger.debug("user device token is", obj["ios"]["device_token"])
+              var evt = req.body.type;
+              notify.sendPushNotification(evt, obj["ios"]["device_token"]);            
+            } else {
+              notify.sendPushNotification("Could not find user!");
+            }
+
             // Change endpoint to dynamic url based on environment
             request
               .post('http://proton-api-dev.us-east-1.elasticbeanstalk.com/v1/notification')
@@ -134,22 +169,18 @@ function StripeWebhook (options, app) {
                 if(err) {
                   logger.error(err)
                 }
-                // logger.info(res)
-                var obj = JSON.parse(JSON.stringify(user));
-                var device_token = (obj.ios != undefined) ? obj.ios.device_token : "";
                 logger.info("success");          
-                logger.info(device_token);              
+                next();            
                 // Calling the end function will send the request
             });       
 
             // Debug on specific device
             var evt = req.body.type;
-            notify.sendPushNotification("OVERLORD event " + evt + " for user " + user["_id"], "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
-            notify.sendPushNotification(evt, device_token);            
+            notify.sendPushNotification("New event! " + evt + " for user " + user["username"], "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
             // res.json({msg: 'push_notfication_sent'});
             next();
           }
-        }).limit(1);
+        });
         return res.send(200).end();
     });
   };
