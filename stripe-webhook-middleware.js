@@ -101,7 +101,11 @@ function StripeWebhook (options, app) {
         logger.info("response ok, default push notify")
         logger.info("request body", req.body)
         logger.info("req user id:", req.body.user_id)
-        User.findOne({'stripe.accountId': req.body.user_id}, function(err, user) {
+        var id = req.body.user_id
+        User.find({'stripe.accountId': id}, function(err, user) {
+          if(err) {
+            logger.error(err)
+          }
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
             logger.error('user not found');
@@ -133,7 +137,7 @@ function StripeWebhook (options, app) {
                 }
                 // logger.info(res)
                 var obj = JSON.parse(JSON.stringify(user));
-                var device_token = (obj.ios.device_token != undefined) ? obj.ios.device_token : "";
+                var device_token = (obj.ios != undefined) ? obj.ios.device_token : "";
                 logger.info("success");          
                 logger.info(device_token);              
                 // Calling the end function will send the request
@@ -141,12 +145,12 @@ function StripeWebhook (options, app) {
 
             // Debug on specific device
             var evt = req.body.type;
-            notify.sendPushNotification("user activity " + evt + " for user " + user["_id"], "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
+            notify.sendPushNotification("OVERLORD event " + evt + " for user " + user["_id"], "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
             notify.sendPushNotification(evt, device_token);            
             // res.json({msg: 'push_notfication_sent'});
             next();
           }
-        });
+        }).limit(1);
         return res.send(200).end();
     });
   };
