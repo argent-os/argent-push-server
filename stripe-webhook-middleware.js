@@ -114,16 +114,15 @@ function StripeWebhook (options, app) {
             // res.status(404).end();
           } else {
             logger.trace("user found");
-            logger.info(JSON.stringify(user, null, 2));
-            logger.info('push notification sent to user:', user.username);
+            // logger.info(JSON.stringify(user, null, 2));
 
             var obj = JSON.parse(JSON.stringify(user));
+            logger.info('push notification sent to user:', obj.username);
             var device_token = (obj.ios != undefined) ? obj.ios.device_token : "";
-            logger.info("device token is");
-            logger.info(device_token);
+            logger.info("device token is", obj.ios.device_token);
+            logger.info(obj.ios.device_token);
 
-            logger.info('user id is: ', user._id)
-            logger.info('sending push notification to api')
+            logger.info('user id is: ', obj._id)
             // Change endpoint to dynamic url based on environment
             request
               .post('http://proton-api-dev.us-east-1.elasticbeanstalk.com/v1/notification')
