@@ -115,10 +115,10 @@ function StripeWebhook (options, app) {
           } else {
             logger.trace("user found");
             logger.info(JSON.stringify(user, null, 2));
-            logger.info('push notification sent to user id:', user._id);
+            logger.info('push notification sent to user:', user.username);
 
             var obj = JSON.parse(JSON.stringify(user));
-            var device_token = (obj.ios.device_token != undefined) ? obj.ios.device_token : "";
+            var device_token = (obj.ios != undefined) ? obj.ios.device_token : "";
             logger.info("device token is");
             logger.info(device_token);
 
