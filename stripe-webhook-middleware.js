@@ -106,7 +106,7 @@ function StripeWebhook (options, app) {
         self.emit('event', event);
 
         logger.info("response ok, default push notify")
-        logger.info("request body", req.body)
+        // logger.info("request body", req.body)
         logger.info("req user id:", req.body.user_id)
         var id = req.body.user_id
         User.findOne({'stripe.accountId': id}, function(err, user) {
@@ -163,7 +163,7 @@ function StripeWebhook (options, app) {
               .post('http://proton-api-dev.us-east-1.elasticbeanstalk.com/v1/notification')
               .send({ user_id: user._id,
                   date: Date.now(),
-                  text: req.body.id })
+                  text: req.body.type })
               .set('Accept', 'application/json')
               .end(function(err, res){
                 if(err) {
