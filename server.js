@@ -13,7 +13,7 @@ var mongoose       = require('mongoose');
 var mongodbUri     = process.env.MONGOLAB_URI;
 var mongooseUri    = uriUtil.formatMongoose(mongodbUri) + '/praxicorp';
 
-// Key Stripe and Firebase Handlers for DEV vs PROD
+// Key Stripe Handlers for DEV vs PROD
 process.env.ENVIRONMENT == 'DEV' ? mongooseUri = process.env.MONGOLAB_URI_DEV : '';
 process.env.ENVIRONMENT == 'PROD' ? mongooseUri = process.env.MONGOLAB_URI : '';
 
@@ -40,7 +40,7 @@ var stripe_webhook = new StripeWebhook({
 }, app);
 
 var notify = require('./push-notification');
-notify.sendPushNotification("push server started", "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
+notify.sendPushNotification("push server started", "1f99c0705eb53fcccf1412a27abf4dc70125a826727a19326b7e2f11d7012edd");
 
 // Listen for webhook events
 app.post('/webhook/stripe', stripe_webhook.middleware);

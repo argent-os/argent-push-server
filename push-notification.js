@@ -55,10 +55,10 @@ module.exports = {
         // If you plan on sending identical paylods to many devices you can do something like this.
         console.log("Sending the same notification each of the devices with one call to pushNotification.");
         var note = new apn.notification();
-        note.setAlertText("Hello, welcome to ProtonPay!");
+        note.setAlertText("Hello, welcome to Argent!");
         note.badge = 0;
         note.sound = "chime.caf";
-        note.alert = "Hello from ProtonPay!  Thank you for joining our app.";
+        note.alert = "Hello from Argent!  Thank you for joining our app.";
         note.payload = {'messageFrom': 'Sinan'};
         service.pushNotification(note, tokens);
     },
@@ -67,21 +67,21 @@ module.exports = {
         console.log("Sending a tailored notification to %d devices", tokens.length);
         tokens.forEach(function(token, i) {
             var note = new apn.notification();
-            note.setAlertText("Hello, from ProtonPay! You are number: " + i);
+            note.setAlertText("Hello, from Argent! You are number: " + i);
             note.badge = 0;
             note.sound = "chime1.caf";
             note.alert = "Push notifications now running";
-            note.payload = {'messageFrom': 'ProtonPay'};
+            note.payload = {'messageFrom': 'Argent'};
             service.pushNotification(note, token);
         });
     },
     sendPushNotification: function(data, userDeviceToken) {
         var note = new apn.notification();
-        note.setAlertText("Hello, from ProtonPay!");
+        note.setAlertText("Hello, from Argent!");
         note.badge = 0;
         note.sound = "soft.caf";
         note.alert = data;
-        note.payload = {'messageFrom': 'ProtonPay'};
+        note.payload = {'messageFrom': 'Argent'};
         service.pushNotification(note, userDeviceToken);
     }
 }

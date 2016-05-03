@@ -67,7 +67,7 @@ function StripeWebhook (options, app) {
           });           
         }
       });
-      notify.sendPushNotification("test.event", "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
+      notify.sendPushNotification("test.event", "1f99c0705eb53fcccf1412a27abf4dc70125a826727a19326b7e2f11d7012edd");
       return res.status(200).end();
     }
 
@@ -116,7 +116,7 @@ function StripeWebhook (options, app) {
           if (!user) {
            // logger.error('User not found resetToken: ' + token);
             logger.error('user not found');
-            notify.sendPushNotification("user not found", "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
+            notify.sendPushNotification("user not found", "1f99c0705eb53fcccf1412a27abf4dc70125a826727a19326b7e2f11d7012edd");
             next();
             // res.status(404).end();
           } else {
@@ -176,7 +176,7 @@ function StripeWebhook (options, app) {
 
             // Debug on specific device
             var evt = req.body.type;
-            notify.sendPushNotification("New event! " + evt + " for user " + user["username"], "deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3");
+            notify.sendPushNotification("New event! " + evt + " for user " + user["username"], "1f99c0705eb53fcccf1412a27abf4dc70125a826727a19326b7e2f11d7012edd");
             // res.json({msg: 'push_notfication_sent'});
             next();
           }
