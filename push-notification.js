@@ -57,7 +57,7 @@ module.exports = {
         var note = new apn.notification();
         note.setAlertText("Hello, welcome to Argent!");
         note.badge = 0;
-        note.sound = "chime.caf";
+        note.sound = "notify.caf";
         note.alert = "Hello from Argent!  Thank you for joining our app.";
         note.payload = {'messageFrom': 'Sinan'};
         service.pushNotification(note, tokens);
@@ -69,7 +69,7 @@ module.exports = {
             var note = new apn.notification();
             note.setAlertText("Hello, from Argent! You are number: " + i);
             note.badge = 0;
-            note.sound = "chime1.caf";
+            note.sound = "notify.caf";
             note.alert = "Push notifications now running";
             note.payload = {'messageFrom': 'Argent'};
             service.pushNotification(note, token);
@@ -79,7 +79,7 @@ module.exports = {
         var note = new apn.notification();
         note.setAlertText("Hello, from Argent!");
         note.badge = 0;
-        note.sound = "soft.caf";
+        note.sound = "notify.caf";
         note.alert = data;
         note.payload = {'messageFrom': 'Argent'};
         service.pushNotification(note, userDeviceToken);
