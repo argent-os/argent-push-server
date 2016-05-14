@@ -56,7 +56,7 @@ module.exports = {
         console.log("Sending the same notification each of the devices with one call to pushNotification.");
         var note = new apn.notification();
         note.setAlertText("Hello, welcome to Argent!");
-        note.badge = 0;
+        note.badge = 1;
         note.sound = "notify.caf";
         note.alert = "Hello from Argent!  Thank you for joining our app.";
         note.payload = {'messageFrom': 'Sinan'};
@@ -68,7 +68,7 @@ module.exports = {
         tokens.forEach(function(token, i) {
             var note = new apn.notification();
             note.setAlertText("Hello, from Argent! You are number: " + i);
-            note.badge = 0;
+            note.badge = 1;
             note.sound = "notify.caf";
             note.alert = "Push notifications now running";
             note.payload = {'messageFrom': 'Argent'};
@@ -78,7 +78,7 @@ module.exports = {
     sendPushNotification: function(data, userDeviceToken) {
         var note = new apn.notification();
         note.setAlertText("Hello, from Argent!");
-        note.badge = 0;
+        note.badge = 1;
         note.sound = "notify.caf";
         note.alert = data;
         note.payload = {'messageFrom': 'Argent'};
