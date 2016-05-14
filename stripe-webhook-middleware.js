@@ -183,7 +183,13 @@ function StripeWebhook (options, app) {
                 case "transfer.paid":
                    notify.sendPushNotification("Transfer paid", device_token);            
                 case "transfer.failed":
-                   notify.sendPushNotification("Transfer failed", device_token);            
+                   notify.sendPushNotification("Transfer failed", device_token); 
+                case "bitcoin.receiver.transaction.created":
+                   notify.sendPushNotification("Bitcoin receiver transaction created", device_token); 
+                case "bitcoin.receiver.created":
+                   notify.sendPushNotification("Bitcoin receiver created", device_token); 
+                case "bitcoin.receiver.filled":
+                   notify.sendPushNotification("Bitcoin receiver filled", device_token); 
                 default:
                    notify.sendPushNotification(evt, device_token);            
               }
