@@ -91,7 +91,13 @@ function StripeWebhook (options, app) {
                 case "account.updated":
                    notify.sendPushNotification("Account updated", device_token);            
                 case "account.application.deauthorized":
-                   notify.sendPushNotification("Account application deauthorized", device_token);            
+                   notify.sendPushNotification("Account application deauthorized", device_token); 
+                case "account.external_account.created":
+                   notify.sendPushNotification("External account created", device_token);            
+                case "account.external_account.updated":
+                   notify.sendPushNotification("External account updated", device_token);            
+                case "account.external_account.deleted":
+                   notify.sendPushNotification("External account deleted", device_token);            
                 case "application_fee.created":
                    notify.sendPushNotification("Application fee created", device_token);            
                 case "application_fee.refunded":
