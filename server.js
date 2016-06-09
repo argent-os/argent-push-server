@@ -45,7 +45,11 @@ notify.sendPushNotification("push server started", "1f99c0705eb53fcccf1412a27abf
 // Listen for webhook events
 app.post('/webhook/stripe', stripe_webhook.middleware);
 
-console.log("listening on port " + port);
+app.get('/health/check', function (req, res) {
+  res.send({ status: "running" })
+})
+
+logger.info("listening on port " + port);
 app.listen(port);
 
 

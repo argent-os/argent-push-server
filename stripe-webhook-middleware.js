@@ -46,22 +46,11 @@ function StripeWebhook (options, app) {
         if(!user) {
           logger.info('no user')
         } else {    
-          request
-            .post('http://192.168.1.232:5001/v1/notification')
-            .send({ user_id: "testuser",
-                date: Date.now(),
-                text: req.body.id })
-            .set('Accept', 'application/json')
-            .end(function(err, res){
-              if(err) {
-                logger.error(err)
-              }
-              // logger.info(res)
-          });           
+          logger.info('user found, pushing')       
         }
       });
       notify.sendPushNotification("test.event", "1f99c0705eb53fcccf1412a27abf4dc70125a826727a19326b7e2f11d7012edd");
-      return res.status(200).end();
+      return res.status(200).json({"msg":"ok"}).end();
     }
 
     logger.trace("tracing")
@@ -262,7 +251,7 @@ function StripeWebhook (options, app) {
 
             // Change push support/activity endpoint to dynamic url based on environment
             request
-              .post('http://proton-api-dev.us-east-1.elasticbeanstalk.com/v1/system/notifications')
+              .post('https://api.argent.cloud/v1/system/notifications')
               .send({ user_id: user._id,
                   date: Date.now(),
                   text: req.body.type })
