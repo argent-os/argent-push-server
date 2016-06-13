@@ -1,4 +1,0 @@
-{
-  "name": "timesheet",
-  "main": "./lib/express-timesheet.js"
-}

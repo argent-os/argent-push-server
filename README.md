@@ -214,6 +214,20 @@ Useful commands
 openssl x509 -in aps.cer -inform DER -outform PEM -out cert.pem
 openssl pkcs12 -in key.p12 -out key.pem -nodes
 
+Detailed instructions
+Go to developer.apple.com
+Follow directions to create an aps.cer using a csr generated from mac
+Download the aps.cer, double click on it to bring it into keychain or drag it into keychain
+Rename aps.cer to cert.cer
+Click arrow on left of the new certificate, shift select both the cert and the key row below it
+Right click 'Export 2 items'
+Generate a key .p12 file, name it 'key' and you will get a key.p12
+Create a directory somewhere to store the cert.cer (renamed from aps.cer) and the key.p12 file (ex: ~/src/push/cert/v1/)
+Execute the following commands
+$ openssl x509 -in cert.cer -inform DER -outform PEM -out cert.pem
+$ openssl pkcs12 -in key.p12 -out key.pem -nodes
+Now put the generated .pem files into the base root of any push notification server and you're ready to go!
+
 ------------------------------
 ###QUESTIONS?
 

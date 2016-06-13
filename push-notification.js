@@ -14,7 +14,7 @@ var options = {
     "cacheLength": 5,
 };
 
-var tokens = ["1db1f83835ceb0458e78df6c88be98e4cb4c757ab6c960cf29b47101f2d92fce"];
+var tokens = ["deb30372ae73fdd21e21ab2f2a9c6431badc22bb124e908ba82b0ec1dd267dc3"];
 
 if(tokens[0] === "") {
     console.log("Please set token to a valid device token for the push notification service");
@@ -55,10 +55,10 @@ module.exports = {
         // If you plan on sending identical paylods to many devices you can do something like this.
         console.log("Sending the same notification each of the devices with one call to pushNotification.");
         var note = new apn.notification();
-        note.setAlertText("Hello, welcome to PayKloud!");
+        note.setAlertText("Hello, welcome to Argent!");
         note.badge = 1;
-        note.sound = "chime.caf";
-        note.alert = "Hello from PayKloud!  Thank you for joining our app.";
+        note.sound = "notify.caf";
+        note.alert = "Hello from Argent!  Thank you for joining our app.";
         note.payload = {'messageFrom': 'Sinan'};
         service.pushNotification(note, tokens);
     },
@@ -67,21 +67,21 @@ module.exports = {
         console.log("Sending a tailored notification to %d devices", tokens.length);
         tokens.forEach(function(token, i) {
             var note = new apn.notification();
-            note.setAlertText("Hello, from PayKloud! You are number: " + i);
+            note.setAlertText("Hello, from Argent! You are number: " + i);
             note.badge = 1;
-            note.sound = "chime2.caf";
+            note.sound = "notify.caf";
             note.alert = "Push notifications now running";
-            note.payload = {'messageFrom': 'PayKloud'};
+            note.payload = {'messageFrom': 'Argent'};
             service.pushNotification(note, token);
         });
     },
     sendPushNotification: function(data, userDeviceToken) {
         var note = new apn.notification();
-        note.setAlertText("Hello, from PayKloud!");
+        note.setAlertText("Hello, from Argent!");
         note.badge = 1;
-        note.sound = "cashregister.caf";
+        note.sound = "notify.caf";
         note.alert = data;
-        note.payload = {'messageFrom': 'PayKloud'};
+        note.payload = {'messageFrom': 'Argent'};
         service.pushNotification(note, userDeviceToken);
     }
 }

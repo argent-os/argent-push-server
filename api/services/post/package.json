@@ -1,4 +1,0 @@
-{
-  "name": "post",
-  "main": "./lib/express-post.js"
-}
