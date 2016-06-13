@@ -10,38 +10,22 @@ var nconf       = require('nconf');
 var moment      = require('moment');
 var logger      = require('../lib/logger')();
 var request     = require('request');
-var Firebase    = require('firebase');
 
 var tokenSecret = process.env.JWT_SECRET;
 var facebookSecret   = process.env.FACEBOOK_SECRET;
-var timekloudSecret = 'B21F3EFCE39FDC5BDE7EEE987D7C8';
+var oAuthSecret = 'B21F3EFCE39FDC5BDE7EEE987D7C8';
 
 var log4js = require('log4js');
 var logger = log4js.getLogger();
-
-// Set up Firebase Dev and Production URLs
-var firebaseUrl;
-var firebaseSecret;
-process.env.ENVIRONMENT == 'DEV' || process.env.ENVIRONMENT == undefined ? firebaseUrl = process.env.FIREBASE_DEV_URL : '';
-process.env.ENVIRONMENT == 'PROD' ? firebaseUrl = process.env.FIREBASE_URL : firebaseUrl = process.env.FIREBASE_DEV_URL;
-
-process.env.ENVIRONMENT == 'DEV' || process.env.ENVIRONMENT == undefined ? firebaseSecret = process.env.FIREBASE_DEV_SECRET : '';
-process.env.ENVIRONMENT == 'PROD' ? firebaseSecret = process.env.FIREBASE_SECRET : '';
 
 var apiUrl;
 process.env.ENVIRONMENT == 'DEV' || process.env.ENVIRONMENT == undefined ? apiUrl = process.env.API_DEV_URL : '';
 process.env.ENVIRONMENT == 'PROD' ? apiUrl = process.env.API_URL : apiUrl = process.env.API_DEV_URL;
 
-var ref = new Firebase(firebaseUrl);
-var FirebaseTokenGenerator = require("firebase-token-generator");
-var tokenGenerator = new FirebaseTokenGenerator(firebaseSecret);
-
 function UserController (req, res, next) {}
 
 UserController.prototype.register = function (req, res, next) {
   var data = req.body;
-  var userFirebase = firebaseUrl;  
-  var userApiUrl = apiUrl; 
   var link;   
   logger.trace('registering');
   logger.info('user email is', req.body.email)
@@ -49,12 +33,12 @@ UserController.prototype.register = function (req, res, next) {
   User.findOne({ email: req.body.email }, function(err, existingUser) {
         if (existingUser) {
           logger.error('email is taken')
-          return res.status(409).send({ message: 'Email is already taken' });
+          return res.status(409).send({ message: 'Email is already taken', type: "email_exists" });
         } else {
           User.findOne({ username: req.body.username }, function(err, existingUser) {
             if(existingUser) {
               logger.error('username is taken')
-              return res.status(409).send({ message: 'Username is already taken' });
+              return res.status(409).send({ message: 'Username is already taken', type: "email_exists" });
             }    
             var verifyToken = utils.randomString(16);  
             var clientId = 'tok_'+utils.randomString(64);
@@ -63,12 +47,25 @@ UserController.prototype.register = function (req, res, next) {
             var scope = 'read_write';    
             var tokenType = 'bearer';    
             var livemode = 'true';    
-            var deviceTokenIOS = req.body.device_token_ios;
             var _date = req.body.tos_acceptance.data.date;
             if( _date.indexOf('.') != -1 ) {
                 var parsedDate = _date.substring(0, _date.indexOf('.'));
                 logger.info("parsing date, " + parsedDate);
             }
+            if(req.body.dob !== undefined) {
+              var dateOfBirth = {
+                "day": req.body.dob.day,
+                "month": req.body.dob.month,
+                "year": req.body.dob.year
+              }
+            } else {}
+
+            if(req.body.legal_entity !== undefined) {
+              var type = legal_entity.type
+            } else {
+              var type = req.body.legal_entity_type
+            }
+
             var user = new User({
               first_name: req.body.first_name,
               last_name: req.body.last_name,
@@ -77,65 +74,64 @@ UserController.prototype.register = function (req, res, next) {
               phone_number: req.body.phone_number,
               password: req.body.password,
               country: req.body.country,
-              legal_entity_type: req.body.legal_entity_type,
-              device_token_ios: deviceTokenIOS,
+              legal_entity: {
+                "first_name": req.body.first_name,
+                "last_name": req.body.last_name,
+                "type": type,
+                "dob": dateOfBirth,
+              },
               tos_acceptance: {
                 "ip":req.body.tos_acceptance.data.ip,
                 "date":parsedDate
               },
-              dob: {
-                "day": req.body.dob.data.day,
-                "month": req.body.dob.data.month,
-                "year": req.body.dob.data.year
-              },
               env: process.env.ENVIRONMENT,
-              firebaseUrl: userFirebase,
               theme: "1",
-              apiUrl: userApiUrl,
               verifyToken: verifyToken,
               token_client_id: clientId,
               token_client_secret: clientSecret,
-              tok_access_token: accessToken,
+              token_access: accessToken,
               token_scope: scope,
               token_livemode: livemode,
               token_type: tokenType
             }); 
             logger.trace('about to save');
-            user.save().then(function() {
+            user.save().then(function(user, err) {
+              if(err) {
+                  logger.error(err);
+                  res.send({ message: err });                                
+              }
               logger.trace('inside save');
               // change to req.body.country      
-              var _firebaseToken = tokenGenerator.createToken({ uid: (user._id).toString(), username: user.username, hasTCAccess: true });   
-              // logger.info(_firebaseToken);   
-                ref.authWithCustomToken(_firebaseToken, function(error, authData) {
-                  if (error) {
-                    logger.error(error);
-                    //logger.info("Login Failed!", error);
-                    res.send(500);                    
-                  } else {
-                    // logger.info(authData);
-                    ////logger.info("Login Succeeded!", authData);
-                    // change routing on registration for prod ui and make https
-                    process.env.ENVIRONMENT == 'DEV' || process.env.ENVIRONMENT == undefined ? link = 'http://localhost:5000/verify' + '?token=' + verifyToken : '';
-                    process.env.ENVIRONMENT == 'PROD' ? link = 'https://www.paykloud.com/verify' + '?token=' + verifyToken : '';                  
-                    mailer.verifyEmail(user, link, function (err, info) {
-                      if (err) {
-                        // logger.info(err);
-                        //logger.error('Sending message error : ' + err);
-                        res.send(504);
-                      }
-                      else {
-                        // var resp = {};
-                        // resp.msg = 'verify_link_sent';
-                        // res.status(200).json(resp);
-                        res.send({ token: createJWT(user), auth: authData,  user: user });                                
-                      }
-                    });                  
-                  }
-                });         
+              process.env.ENVIRONMENT == 'DEV' || process.env.ENVIRONMENT == undefined ? link = 'http://localhost:5000/verify' + '?token=' + verifyToken : '';
+              process.env.ENVIRONMENT == 'PROD' ? link = 'https://api.argent.cloud/verify' + '?token=' + verifyToken : '';                  
+              mailer.verifyEmail(user, link, function (err, info) {
+                if (err) {
+                  logger.error('Error occured : ' + err);
+                  // res.sendStatus(504);
+                  res.send({ message: "Error occured" });                                
+                }
+                else {
+                  res.send({ token: createJWT(user, user.username),  user: user, message: "Welcome to Argent" });                                
+                }
+              });      
             });                
          });
         }
     });
+};
+
+UserController.prototype.ping = function (req, res, next) {
+  var self = this;
+  // ping with either username or email
+  logger.trace('ping req received');
+  User.findOne({ $or: [ { email: req.body.email }, { username: req.body.username } ] }, function(err, user) {
+      if (!user) {
+          logger.error("user not found");
+          return res.status(404).send({ message: 'user not found' });
+      }      
+      logger.info("done");
+      res.status(200).send({ msg: 'pong', user: user.username });
+  });
 };
 
 UserController.prototype.login = function (req, res, next) {
@@ -146,6 +142,9 @@ UserController.prototype.login = function (req, res, next) {
     if (!user) {
       return res.status(401).send({ message: 'Wrong username/email and/or password' });
     }
+    if(err) {
+      logger.error(err);
+    }
     logger.info('found user, comparing password');
     user.comparePassword(req.body.password, function(err, isMatch) {
       if (!isMatch) {
@@ -153,30 +152,24 @@ UserController.prototype.login = function (req, res, next) {
         return res.status(401).send({ message: 'Wrong username/email and/or password' });
       } else if(err) {
         logger.error(err);
+        return res.status(401).send({ message: 'Error logging in' });        
       }
       logger.info('password match for user', user.username);      
-      res.send({ token: createJWT(user), user: user });          
-      // var _firebaseToken = tokenGenerator.createToken({ uid: (user._id).toString(), username: user.username, hasTCAccess: true });
-      // ref.authWithCustomToken(_firebaseToken, function(error, authData) {
-      //   if (error) {
-      //     // logger.info("Login Failed!", error);
-      //     res.send(500);                    
-      //   } else {
-      //     ////logger.info("Login Succeeded!", authData);
-      //     // res.send({ token: createJWT(user), auth: authData,  user: user });          
-      //   }
-      // });      
+      logger.debug("login data is");
+      // logger.debug(user);
+
+      res.send({ token: createJWT(user), user: user });             
     });
   });
 };
 
-UserController.prototype.loginTimekloud = function(req, res, next) {
+UserController.prototype.loginOAuth = function(req, res, next) {
     var accessTokenUrl = 'http://localhost:5000/v1/oauth/access_token';
     var cloudApiUrl = 'http://localhost:5000/v1/me';
     var params = {
       code: req.body.code,
       client_id: req.body.clientId,
-      client_secret: timekloudSecret,
+      client_secret: oAuthSecret,
       redirect_uri: req.body.redirectUri
     };
 
@@ -192,9 +185,9 @@ UserController.prototype.loginTimekloud = function(req, res, next) {
           return res.status(500).send({ message: profile.error.message });
         }
         if (req.headers.authorization) {
-          User.findOne({ timekloud: profile.id }, function(err, existingUser) {
+          User.findOne({ proton: profile.id }, function(err, existingUser) {
             if (existingUser) {
-              return res.status(409).send({ message: 'There is already a TimeKloud account that belongs to you' });
+              return res.status(409).send({ message: 'There is already a Proton account that belongs to you' });
             }
             var token = req.headers.authorization.split(' ')[1];
             var payload = jwt.decode(token, tokenSecret);
@@ -202,7 +195,7 @@ UserController.prototype.loginTimekloud = function(req, res, next) {
               if (!user) {
                 return res.status(400).send({ message: 'User not found' });
               }
-              user.timekloud = profile.id;
+              user.proton = profile.id;
               user.picture = user.picture || 'http://localhost:5000/v1/' + profile.id + '/picture?type=large';
               user.displayName = user.displayName || profile.name;
               user.save(function() {
@@ -213,13 +206,13 @@ UserController.prototype.loginTimekloud = function(req, res, next) {
           });
         } else {
           // Step 3b. Create a new user account or return an existing one.
-          User.findOne({ timekloud: profile.id }, function(err, existingUser) {
+          User.findOne({ proton: profile.id }, function(err, existingUser) {
             if (existingUser) {
               var token = createJWT(existingUser);
               return res.send({ token: token, user: existingUser });
             }
             var user = new User();
-            user.timekloud = profile.id;
+            user.proton = profile.id;
             user.picture = 'http://localhost:5000/' + profile.id + '/picture?type=large';
             user.displayName = profile.name;
             user.save(function() {
@@ -257,25 +250,6 @@ UserController.prototype.removeAccount = function (req, res, next) {
     if (!err) {
       // logger.info(req.body.email);
       // logger.info(req.body.password);       
-      ref.removeUser({
-        email: email,
-        password: password
-      }, function(error) {
-        if (error) {
-          switch (error.code) {
-            case "INVALID_USER":
-              // logger.info("The specified user account does not exist.");
-              break;
-            case "INVALID_PASSWORD":
-              // logger.info("The specified user account password is incorrect.");
-              break;
-            default:
-              // logger.info("Error removing user:", error);
-          }
-        } else {
-          // logger.info("User account deleted successfully!");
-        }
-      });
       res.status(200).send({msg: 'account_removed'});
     }
     else {
@@ -286,131 +260,125 @@ UserController.prototype.removeAccount = function (req, res, next) {
 
 UserController.prototype.editProfile = function (req, res, next) {
   var data = req.body;
-  // logger.info(data.stripeData);
-  // req.assert('username', 'Username must be at least 4 characters long').len(4);
-  // req.assert('email', 'Email is not valid').isEmail();
-  var errors = req.validationErrors();
-  if (errors) {
-    res.status(400).json(errors);
-    return false;
-  }
+  logger.trace("update profile req received");
+  var user_id = req.params.uid;
   userHelper.checkIfUserExists(req.user, data, function (result) {
     if (result === 'user_uniq') {
-      User.findOne({_id: req.user._id}, function (err, user) {
+      User.findOne({ $or: [ { _id: user_id }, { email: req.user.email } ] }, function (err, user) {
           if (!user) {
-            //logger.info('User not found for account update. User id : ' + req.user._id);
+            logger.info('User not found for account update. User id : ' + req.user._id);
             res.status(404).json({msg: 'User not found, could not update'})
             return;
           }
           else {
             var updated = [];
-            if (user.email !== data.user.email && data.user.email !=null && data.email !== '' && data.email !== undefined) {
-              updated.push('email');
-              user.email = data.user.email;
-            }
-            if (user.role !== data.user.role && data.user.email !=null && data.role !== '' && data.role !== undefined) {
-              updated.push('role');
-              user.role = data.user.role;
-            }      
-            if (user.orgId !== data.orgId && data.orgId !=null && data.orgId !== '' && data.orgId !== undefined) {
-              updated.push('orgId');
-              user.orgId = data.orgId;
-            }      
-            if (user.notificationsEnabled !== data.user.notificationsEnabled) {
-              updated.push('notificationsEnabled');
-              user.notificationsEnabled = data.user.notificationsEnabled;
-            }   
-            if (user.apiKey !== data.apiKey && data.apiKey !=null) {
-              updated.push('apiKey');
-              user.apiKey = data.apiKey;
-            }     
-            if (user.picture !== data.picture && data.picture !=null) {
-              updated.push('picture');
-              user.picture = data.picture;
-            }      
-            if (user.fullname !== data.user.fullname && data.stripeToken !== null) {
-              updated.push('fullname');
-              user.fullname = data.user.fullname;
-            }    
-            if (user.first_name !== data.user.first_name) {
-              updated.push('first_name');
-              user.first_name = data.user.first_name;
-            }     
-            if (user.last_name !== data.user.last_name) {
-              updated.push('last_name');
-              user.last_name = data.user.last_name;
-            }                                                                           
-            if (user.username !== data.user.username && data.stripeToken !== null) {
-              updated.push('username');
-              user.username = data.user.username;
-            }     
-            if (user.stripeToken !== data.stripeToken && data.stripeToken !== undefined && data.stripeToken !== null) {
-              updated.push('stripeToken');
-              user.stripeToken = data.stripeToken;
-            }    
-            if (user.stripeEnabled !== data.stripeEnabled && data.stripeEnabled !== undefined && data.stripeEnabled !== null && data.stripeEnabled !== "") {
-              updated.push('stripeEnabled');
-              user.stripeEnabled = data.stripeEnabled;
-            } 
-            if (user.stripeData !== data.stripeData && data.stripeData !== null) {
-              updated.push('stripeData');
-              user.stripeData = data.stripeData;
-            }                                  
-            if (user.verified !== data.verified && data.verified !== undefined && data.verified !== null && data.verified !== "") {
-              updated.push('verified');
-              user.verified = data.verified;
-            }    
-            if (user.theme !== data.theme && data.theme !== undefined && data.theme !== null && data.theme !== "") {
-              updated.push('theme');
-              user.theme = data.theme;
-            }                     
-            if (user.verifyToken !== data.verifyToken) {
-              updated.push('verifyToken');
-              user.verifyToken = data.verifyToken;
-            }                                       
-            if (data.password !== '' && data.password !== null && data.password !== undefined && data.password !== '') {
-              updated.push('password');
-              user.password = data.password;
-            }
-            if (updated.length > 0) {
-              user.date_modified = Date.now();
-              var out = {
-                email: user.email,
-                password: user.password,
-                fullname: user.fullname,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                username: user.username,
-                stripeToken: user.stripeToken,
-                stripeEnabled: user.stripeEnabled,
-                stripeData: user.stripeData,
-                verifyToken: user.verifyToken,
-                verified: user.verified,
-                theme: user.theme,
-                orgId: user.orgId,
-                notificationsEnabled: user.notificationsEnabled,
-                apiKey: user.apiKey,
-                picture: user.picture,
-                role: [user.role]
-              };
-            }
-            else {
-              res.status(200).json({msg: 'Data not modified'});
-              return;
-            }
-
-            user.save(function(err) {
-              if (err) {
-                // logger.info(err);
-                //logger.error('Error updating user account. User id: ' + req.user._id + ' Err: ' + err);
-                res.status(401).json({msg: 'update_error'});
+            logger.trace("user found in update")
+            logger.debug('requesting user is', req.user.email);
+            // check that user is sent through request and not the body
+            if(req.user !== undefined) {
+              // check if user data is sent as body
+              if (user.email !== data.email && data.email !== null && data.email !== '' && data.email !== undefined) {
+                updated.push('email');
+                user.email = data.email;
+              }
+              if (user.username !== data.username && data.username !== null && data.username !== undefined && data.username !== "") {
+                updated.push('username');
+                user.username = data.username;
+              }   
+              if (user.role !== data.role && req.user.email !=null && data.role !== '' && data.role !== undefined) {
+                updated.push('role');
+                user.role = data.role;
+              }      
+              if (user.notificationsEnabled !== data.notificationsEnabled && data.notificationsEnabled !== null && data.notificationsEnabled !== undefined && data.notificationsEnabled !== "") {
+                updated.push('notificationsEnabled');
+                user.notificationsEnabled = data.notificationsEnabled;
+              }  
+              if (user.first_name !== data.first_name && data.first_name !== null && data.first_name !== undefined && data.first_name !== "") {
+                updated.push('first_name');
+                user.first_name = data.first_name;
+              }     
+              if (user.last_name !== data.last_name && data.last_name !== null && data.last_name !== undefined && data.last_name !== "") {
+                updated.push('last_name');
+                user.last_name = data.last_name;
+              }   
+              if (user.orgId !== data.orgId && data.orgId !=null && data.orgId !== '' && data.orgId !== undefined) {
+                updated.push('orgId');
+                user.orgId = data.orgId;
+              }        
+              if (user.picture !== data.picture && data.picture !== null && data.picture !== undefined && data.picture !== "") {
+                updated.push('picture');
+                user.picture = data.picture;
+              }                                                                                
+              if (user.stripe !== data.stripe && data.stripe !== null && data.stripe !== undefined && data.stripe !== "") {
+                updated.push('stripe');
+                user.stripe = data.stripe;
+              }    
+              if (user.plaid !== data.plaid && data.plaid !== undefined && data.plaid !== null && data.plaid != '') {
+                updated.push('plaid');
+                user.plaid = data.plaid;
+              }    
+              if (user.ios !== data.ios && data.ios !== undefined && data.ios !== null && data.ios != '') {
+                updated.push('ios');
+                user.ios = data.ios;
+              }                                                                
+              if (user.verified !== data.verified && data.verified !== undefined && data.verified !== null && data.verified !== '') {
+                updated.push('verified');
+                user.verified = data.verified;
+              }    
+              if (user.theme !== data.theme && data.theme !== undefined && data.theme !== null && data.theme !== '') {
+                updated.push('theme');
+                user.theme = data.theme;
+              }                     
+              if (user.verifyToken !== data.verifyToken) {
+                updated.push('verifyToken');
+                user.verifyToken = data.verifyToken;
+              }                                       
+              if (data.password !== '' && data.password !== null && data.password !== undefined && data.password !== '') {
+                updated.push('password');
+                user.password = data.password;
+              }
+              if (updated.length > 0) {
+                user.date_modified = Date.now();
+                var out = {
+                  email: user.email,
+                  password: user.password,
+                  fullname: user.fullname,
+                  first_name: user.first_name,
+                  last_name: user.last_name,
+                  username: user.username,
+                  stripe: user.stripe,
+                  plaid: user.plaid,                
+                  ios: user.ios,                
+                  verifyToken: user.verifyToken,
+                  verified: user.verified,
+                  theme: user.theme,
+                  orgId: user.orgId,
+                  notificationsEnabled: user.notificationsEnabled,
+                  picture: user.picture,
+                  role: [user.role]
+                };
               }
               else {
-                var newToken = createJWT(user);
-                res.json({token: newToken, user: user});
+                res.status(200).json({msg: 'Data not modified'});
+                return;
               }
-            });
-          }
+
+              user.save(function(err) {
+                if (err) {
+                  logger.error(err);
+                  logger.error('Error updating user account. User id: ' + req.user._id + ' Err: ' + err);
+                  res.status(401).json({msg: 'update_error', err: err});
+                }
+                else {
+                  logger.info("saving user update")
+                  var newToken = createJWT(user);
+                  res.json({token: newToken, user: user});
+                }
+              });
+            } else {
+              logger.error("user data not in request")
+            }
+          } 
         });
     }
     else {
@@ -420,6 +388,8 @@ UserController.prototype.editProfile = function (req, res, next) {
 };
 
 UserController.prototype.getProfile = function (req, res, next) {
+  // logger.trace("getting profile");
+  // logger.debug(req.user);
   var errors = req.validationErrors();
   if (errors) {
     res.status(400).json(errors);
@@ -427,12 +397,58 @@ UserController.prototype.getProfile = function (req, res, next) {
   }
   User.findById(req.user._id, function (err, user) {
       if (!user) {
-        //logger.info('User not found for account update. User id : ' + req.user._id);
+        logger.info('User not found for account retrieval. User id : ' + req.user._id);
+        res.json({err: "could not get profile"});
         return;
       }
       else {
         res.json(user);
         return;
+      }
+    });
+};
+
+UserController.prototype.getUser = function (userId, cb) {
+  return User.findById(userId, function (err, user) {
+      if (!user) {
+        logger.info('User not found for account | User id : ' + userId);
+        return;
+      }
+      else {
+        return user;
+      }
+    });
+};
+
+UserController.prototype.getDelegatedUserByUsername = function (username, cb) {
+  return User.findOne({ username: username }, function (err, user) {
+      if (!user) {
+        logger.info('User not found for account | username : ' + username);
+        return;
+      }
+      else {
+        return user;
+      }
+    });
+};
+
+UserController.prototype.editUserPicture = function (userId, picture) {
+  return User.findById(userId, function (err, user) {
+      if (!user) {
+        logger.info('User not found for account | User id : ' + userId);
+        return;
+      }
+      else {
+        logger.debug('got user, updating picture ' + JSON.stringify(picture))
+        user.picture = picture;
+        user.save(function(err) {
+            if (err) {
+              logger.error('Error updating user picture. User: ' + userId);
+            }
+            else {
+              logger.info("saved user picture")
+            }
+        });
       }
     });
 };
@@ -459,18 +475,9 @@ UserController.prototype.remindPassword = function(req, res) {
 
   var url;
   process.env.ENVIRONMENT == "DEV" ? url = "http://localhost:5000/reset" : "";
-  // process.env.ENVIRONMENT == "PROD" ? url = "https://www.paykloud.com/reset" : "";
-  process.env.ENVIRONMENT == "PROD" ? url = "http://paykloud-www-dev.us-east-1.elasticbeanstalk.com/reset" : "";
+  // process.env.ENVIRONMENT == "PROD" ? url = "https://www.argentapp.com/reset" : "";
+  process.env.ENVIRONMENT == "PROD" ? url = "https://api.argent.cloud/reset" : "";
   
-  logger.info('reminding');
-  // if (email === '' || !email) {
-  //   res.status(400).json([{msg: 'Email cannot be empty', param: 'email'}]);
-  //   return;
-  // }
-  // if (url === '' || !url) {
-  //   res.status(400).json([{msg: 'Url for reset password link is not specified', param: 'url'}]);
-  //   return;
-  // }
   User.findOne({ $or: [ { email: req.body.email }, { username: req.body.username } ] }, function(err, user) {
     if (!user) {
       logger.info("user not found");
@@ -551,15 +558,18 @@ UserController.prototype.authorize = function (req, res, next) {
 
   var payload = null;
   try {
+    // logger.debug('decoding jwt, token is', token);
     payload = jwt.decode(token, tokenSecret);
   }
   catch (err) {
-    return res.status(401).send({ message: err.message });
+    return res.status(401).send({ message: err.message, err: err });
   }
 
   if (payload.exp <= moment().unix()) {
     return res.status(401).send({ message: 'Token has expired' });
   }
+  // logger.debug('payload user is', payload.user);
+  // logger.debug('payload is', payload);
   req.user = payload.user;
   next();
 }
@@ -576,7 +586,7 @@ UserController.prototype.keepAlive = function (req, res, next) {
     else {
       User.findOne({_id: decoded.user._id}, function (err, user) {
         if (err || !user) {
-          //logger.error('KeepAlive, issue generating token for user id : ' + decoded.user._id);
+          logger.error('KeepAlive, issue generating token for user id : ' + decoded.user._id);
           res.status(400).json({error: 'Issue generating token'});
         }
         else {
@@ -590,7 +600,6 @@ UserController.prototype.keepAlive = function (req, res, next) {
     res.status(400).send('Unauthorized');
   }
 }
-
 
 // Adds or updates a users card.
 
@@ -642,16 +651,6 @@ UserController.prototype.postPlan = function(req, res, next){
     return;
   }
 
-  // if(req.body.stripeToken){
-  //   stripeToken = req.body.stripeToken;
-  // }
-
-  // if(!req.body.user.stripe.last4 && !req.body.stripeToken){
-  //   // req.flash('errors', {msg: 'Please add a card to your account before choosing a plan.'});
-  //   // return res.redirect(req.redirect.failure);
-  //   ////logger.info('please add card to account before choosing plan');
-  // }
-
   User.findById(req.body.user._id, function (err, user) {
     if (err) return next(err);
     user.setPlan(_plan, function (err, response) {
@@ -678,6 +677,47 @@ UserController.prototype.postPlan = function(req, res, next){
   });
 };
 
+UserController.prototype.searchUser = function (req, res, next) {
+  User.find({ $text: { $search: req.body.username } }, function(err, doc) {
+    //Do your action here..
+    if(err) {
+      logger.error(err);
+    }
+    usersArr = [];
+    for(var i = 0; i<doc.length; i++) {
+          var user = {
+            first_name: doc[i].first_name,
+            last_name: doc[i].last_name,
+            username: doc[i].username,
+            country: doc[i].country,
+            picture: doc[i].picture.secure_url
+          }
+          // logger.info(doc[i]);
+          usersArr.push(user);
+    }
+
+    res.json({users: usersArr})
+  });
+}
+
+UserController.prototype.listAllUsers = function (req, res, next) {
+  User.find({}, function(err, users) {
+    var userMap = {};
+    var usersArr = [];
+    users.forEach(function(user) {
+      var user = {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        username: user.username,
+        country: user.country,
+        picture: user.picture.secure_url
+      }
+      usersArr.push(user);
+    });
+    // res.send(userMap);  
+    res.send({users: usersArr});  
+  });
+}
 
 function getToken(req) {
   if (req.headers.authorization) {
@@ -690,7 +730,7 @@ function getToken(req) {
 
 var hat = require('hat');
 function createApiKey(user) {
-  user = _.pick(user, '_id' ,'email'); 
+  user = _.pick(user, '_id' ,'email', 'username'); 
   var rack = hat.rack(); 
   var payload = {
     user: user,
@@ -701,10 +741,13 @@ function createApiKey(user) {
 }
 
 function createJWT(user, data) {
-  user = _.pick(user, '_id' ,'email');  
+  user = _.pick(user, '_id', 'email', 'username');  
   var payload = {
-    user: user,
-    data: data,
+    user: {
+      _id: user["_id"],
+      email: user["email"],
+      username: user["username"]
+    },
     iat: new Date().getTime(),
     exp: moment().add(7, 'days').valueOf()
   };
