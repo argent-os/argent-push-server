@@ -50,6 +50,7 @@ app.get('/health/check', function (req, res) {
 })
 
 logger.info("listening on port " + port);
+
 app.listen(port);
 
 

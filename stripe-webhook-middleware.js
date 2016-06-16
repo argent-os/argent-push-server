@@ -185,7 +185,16 @@ function StripeWebhook (options, app) {
                    break;            
                 case "invoice.payment_failed ":
                    notify.sendPushNotification("Invoice payment failed", device_token);
-                   break;            
+                   break;   
+                case "payment.created ":
+                   notify.sendPushNotification("Payment created", device_token);
+                   break; 
+                case "payment.failed ":
+                   notify.sendPushNotification("Payment failed", device_token);
+                   break; 
+                case "payment.updated ":
+                   notify.sendPushNotification("Payment updated", device_token);
+                   break;                             
                 case "invoiceitem.created":
                    notify.sendPushNotification("Invoice item created", device_token);
                    break;            
