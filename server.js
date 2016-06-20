@@ -40,7 +40,7 @@ var stripe_webhook = new StripeWebhook({
 }, app);
 
 var notify = require('./push-notification');
-notify.sendPushNotification("push server started", "1f99c0705eb53fcccf1412a27abf4dc70125a826727a19326b7e2f11d7012edd");
+notify.sendPushNotification("push server started", "e007b1b09012a0776cfb8a8d5b6d9ed3cc4207c6d960f242cddf0744a4fe76df");
 
 // Listen for webhook events
 app.post('/webhook/stripe', stripe_webhook.middleware);
